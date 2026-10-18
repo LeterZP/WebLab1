@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+}
+
+thead {
+    font-family: serif;
+    font-size: 18pt;
+    color: rgb(58, 58, 58);
+    background-color: rgb(202, 243, 255);
+    text-align: left;
+}
+
+th {
+    padding: 18px;
+    border-bottom: 2px solid black;
+}
+
+table {
+    border-spacing: 0;
+    width: 100%;
+}
+
+.canvas {
+    text-align: center;
+}
