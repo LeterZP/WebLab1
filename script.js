@@ -8,6 +8,7 @@ const draw = {
         x: canvas.height / 2,
         y: canvas.width / 2, 
     },
+
     coordinates: () => {
         let context = draw.context;
         let center = draw.center;
@@ -79,8 +80,8 @@ const draw = {
             context.lineTo(center.x + 0.02*size, center.y - 0.75*size);
             context.closePath();
             context.stroke();
-            context.fillText("1", center.x + 0.22*size, center.y - 0.05*size);
-            context.fillText("1", center.x + 0.05*size, center.y - 0.22*size);
+            context.fillText("R", center.x + 0.22*size, center.y - 0.05*size);
+            context.fillText("R", center.x + 0.05*size, center.y - 0.22*size);
         };
 
         lines();
@@ -88,6 +89,7 @@ const draw = {
         yArrow(center.x, 0);
         marks();
     },
+
     form : (R) => {
         let context = draw.context;
         let center = draw.center;
@@ -122,6 +124,39 @@ const draw = {
         triangle();
         rectangle();
         draw.coordinates();
+    },
+
+    point: (x, y) => {
+        let context = draw.context;
+        let center = draw.center;
+        let size = draw.size;
+
+        x = center.x + 0.25*size*x;
+        y = center.y - 0.25*size*y;
+        context.fillStyle = "red";
+
+        function downArrow(x) {
+            let y = center.y + size;
+            let py = y - 0.1*size;
+            let p1x = x + 0.02*size;
+            let p2x = x - 0.02*size;
+            context.beginPath();
+            context.moveTo(p1x, py);
+            context.lineTo(x, y);
+            context.lineTo(p2x, py);
+            context.closePath();
+            context.fill();
+        };
+
+        function point(x, y) {
+            context.beginPath();
+            context.arc(x, y, 0.02*size, 0, 2*Math.PI);
+            context.closePath();
+            context.fill();
+        };
+
+        if (y > center.y + 0.98*size) downArrow(x);
+        else point(x, y);
     },
 };
 
@@ -175,9 +210,9 @@ const values = {
         let radio = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
         let min = -5; let max = 3;
         let button = [1, 1.5, 2, 2.5, 3];
-        let x = parseFloat(values.getX(values.X));
-        let y = parseFloat(values.getY(values.Y));
-        let r = parseFloat(values.getR(values.R));
+        let x = parseFloat(values.getX());
+        let y = parseFloat(values.getY());
+        let r = parseFloat(values.getR());
         for (let i = 0; i < radio.length; i++) {
             if (x === radio[i]) break;
             if (i + 1 === radio.length) return false;
@@ -203,6 +238,7 @@ draw.context.font = draw.size*0.1 + "px serif";
 draw.form(1);
 
 
+
 // инициализация ивентов
 const form = document.forms["form"];
 
@@ -218,6 +254,7 @@ form.addEventListener("submit", (event) => {
     const [x, y, r] = values.getValues();
     if (!(x === undefined || y === undefined || r === undefined)) {
         draw.form(r);
+        draw.point(x, y);
         values.resetValues();
     };
 },);
