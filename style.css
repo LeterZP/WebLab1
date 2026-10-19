@@ -2,6 +2,11 @@ body {
     margin: 0;
 }
 
+table {
+    border-spacing: 0;
+    width: 100%;
+}
+
 thead {
     font-family: serif;
     font-size: 18pt;
@@ -13,13 +18,27 @@ thead {
 th {
     padding: 18px;
     border-bottom: 2px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
 }
 
-table {
-    border-spacing: 0;
-    width: 100%;
+td {
+    border: 1px solid black;
 }
 
 .canvas {
     text-align: center;
+}
+
+.success, .failure {
+    text-align: center;
+    padding: 12px;
+}
+
+.success {
+    background-color: greenyellow;
+}
+
+.failure {
+    background-color: rgb(255, 95, 67);
 }

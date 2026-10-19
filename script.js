@@ -188,11 +188,11 @@ const values = {
         for (let i = 0; i < values.X.length; i++) {
             if (values.X[i].checked === true) radio = values.X[i];
         };
-        return radio.value;
+        return Number(radio.value);
     },
 
     getY: () => {;
-        return values.Y[0].value;
+        return Number(values.Y[0].value);
     },
 
     getR: () => {
@@ -203,21 +203,21 @@ const values = {
                 break;
             };
         };
-        return button.value;
+        return Number(button.value);
     },
 
     validValues: () => {
         let radio = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
         let min = -5; let max = 3;
         let button = [1, 1.5, 2, 2.5, 3];
-        let x = parseFloat(values.getX());
-        let y = parseFloat(values.getY());
-        let r = parseFloat(values.getR());
+        let x = values.getX();
+        let y = values.getY();
+        let r = values.getR();
         for (let i = 0; i < radio.length; i++) {
             if (x === radio[i]) break;
             if (i + 1 === radio.length) return false;
         };
-        if (y != parseFloat(y) || y > max || y < min) return false;
+        if (y === NaN || y > max || y < min) return false;
         for (let i = 0; i < button.length; i++) {
             if (r === button[i]) break;
             if (i + 1 === button.length) return false;
@@ -233,9 +233,76 @@ const values = {
 
 
 
-// инициализация динамического содержимого страницы
+// Объект для взаимодействия с хранилищем
+const storage = {
+    storage: window.localStorage,
+    data: [],
+
+    loadAllItems: () => {
+        let i = 0;
+        while (storage.storage.key(i) != null) {
+            storage.data[i] = storage.parseItem(storage.storage.getItem(i));
+            storage.showItem(i, storage.data[i]);
+            i++;
+        };
+    },
+
+    parseItem: (str) => {
+        let arr = str.split(",");
+        if (arr.length != 5) return undefined;
+        return [Number(arr[0]), Number(arr[1]), Number(arr[2]), Boolean(arr[3] === "true"), arr[4]];
+    },
+
+    addItem: (x, y, r) => {
+        let item = [x, y, r, isHitted(x, y, r), "hehehe"];
+        let key = storage.data.length;
+        storage.storage.setItem(key, item);
+        storage.data[key] = item;
+        storage.showItem(key, item);
+    },
+
+    getItem: (key) => {
+        return storage.data[key];
+    },
+
+    clearStorage: () => {
+        storage.data = [];
+        storage.storage.clear();
+    },
+
+    showItem: (i, item) => {
+        const table = document.getElementById("storage");
+        const tr = document.createElement("tr");
+        tr.id = "item " + i;
+        if (item[3]) tr.className = "success"; else tr.className = "failure";
+        const arr = [i, ...item];
+        for (let j in arr) {
+            const J = document.createElement("td");
+            J.appendChild(document.createTextNode(arr[j]));
+            tr.appendChild(J);
+        };
+        if (i != 0) {
+            const previousTr = document.getElementById("item " + (i - 1));
+            table.insertBefore(tr, previousTr);
+        } else table.appendChild(tr);
+    },
+};
+
+
+
+// функция для вычисления попадания точки
+function isHitted(x, y, r) {
+    if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return true;
+    if (x <= 0 && y >= 0 && y <= x + r) return true;
+    if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return true;
+    return false;
+};
+
+
+// инициализация начального содержимого страницы
 draw.context.font = draw.size*0.1 + "px serif";
 draw.form(1);
+storage.loadAllItems();
 
 
 
@@ -255,6 +322,8 @@ form.addEventListener("submit", (event) => {
     if (!(x === undefined || y === undefined || r === undefined)) {
         draw.form(r);
         draw.point(x, y);
+        storage.addItem(x, y, r);
+        console.log(storage.getItem(storage.data.length - 1));
         values.resetValues();
     };
 },);
