@@ -126,3 +126,68 @@ draw.form = (R) => {
 
 draw.form(3);
 draw.coordinates();
+
+function disableButton(buttons, i) {
+    for (let j = 0; j < buttons.length; j++) {
+        buttons[j].disabled = false;
+    };
+    if (i < buttons.length) buttons[i].disabled = true;
+};
+
+function getValues(X, Y, R) {
+    function getX(X) {
+        let radio;
+        for (let i = 0; i < X.length; i++) {
+            if (X[i].checked === true) {
+                radio = X[i];
+                X[i].checked = false;
+                break;
+            };
+        };
+        return radio.value;
+    };
+
+    function getY(Y) {
+        let text = Y[0];
+        Y[0].value = "";
+        return text.value;
+    };
+
+    function getR(R) {
+        let button;
+        for (let i = 0; i < R.length; i++) {
+            if (R[i].disabled === true) {
+                button = R[i];
+                break;
+            };
+        };
+        disableButton(R, R.length);
+        return button.value;
+    };
+
+    return [getX(X), getY(Y), getR(R)];
+};
+
+const X = document.getElementsByName("X");
+const Y = document.getElementsByClassName("Y");
+const R = document.getElementsByClassName("R");
+
+for (let i = 0; i < R.length; i++) {
+    R[i].addEventListener("click", (event) => {
+        disableButton(R, i);
+        event.preventDefault();
+    },);
+};
+
+const form = document.forms["form"];
+
+form.addEventListener("submit", (event) => {
+    console.log(getValues(X, Y, R));
+    event.preventDefault();
+},);
+
+form.addEventListener("reset", (event) => {
+    event.preventDefault();
+    disableButton(R, R.length);
+},);
+
