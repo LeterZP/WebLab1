@@ -235,7 +235,7 @@ const values = {
             if (x === radio[i]) break;
             if (i + 1 === radio.length) return false;
         };
-        if (y === NaN || y > max || y < min) return false;
+        if (y.toString() == NaN.toString() || y > max || y < min) return false;
         for (let i = 0; i < button.length; i++) {
             if (r === button[i]) break;
             if (i + 1 === button.length) return false;
@@ -276,7 +276,7 @@ const storage = {
 
     // Функция для добавления значения в хранилище
     addItem: (x, y, r) => {
-        let item = [x, y, r, isHitted(x, y, r), "hehehe"];
+        let item = [x, y, r, isHitted(x, y, r), getTime()];
         let key = storage.data.length;
         storage.storage.setItem(key, item);
         storage.data[key] = item;
@@ -292,6 +292,14 @@ const storage = {
     clearStorage: () => {
         storage.data = [];
         storage.storage.clear();
+        const table = document.getElementById("storage");
+        let i = 0;
+        while (i < table.childNodes.length) {
+            let e = table.childNodes[i];
+            if (e.className == "success" || e.className == "failure") table.removeChild(e);
+            else i++;
+        };
+        storage.loadAllItems();
     },
 
     // Функция для вывода элементов хранилища в таблицу
@@ -300,6 +308,7 @@ const storage = {
         const tr = document.createElement("tr");
         tr.id = "item " + i;
         if (item[3]) tr.className = "success"; else tr.className = "failure";
+        item[4] = parseTime(item[4]);
         const arr = [i, ...item];
         for (let j in arr) {
             const J = document.createElement("td");
@@ -324,6 +333,23 @@ function isHitted(x, y, r) {
 };
 
 
+
+// Функция для нахождения текущего времени UTC в виде строки
+function getTime() {
+    const date = new Date();
+    return date.toUTCString().split(",")[1];
+};
+
+
+
+// Функция для превращения строки UTC в местное время
+function parseTime(time) {
+    const date = new Date(time);
+    return date.toLocaleString("ru-RU").split(",").join("");
+};
+
+
+
 // Инициализация начального содержимого страницы
 draw.context.font = draw.size*0.1 + "px serif";
 draw.form(1);
@@ -333,6 +359,7 @@ storage.loadAllItems();
 
 // Инициализация ивентов
 const form = document.forms["form"];
+const button = document.getElementById("clear");
 
 // Ивент на нажатие кнопки из поля R
 for (let i = 0; i < values.R.length; i++) {
@@ -350,8 +377,10 @@ form.addEventListener("submit", (event) => {
         draw.form(r);
         draw.point(x, y);
         storage.addItem(x, y, r);
-        console.log(storage.getItem(storage.data.length - 1));
         values.resetValues();
+    } else {
+        const msg = document.getElementById("message");
+        msg.textContent = "Введеные значения неверны. Попробуйте снова.";
     };
 },);
 
@@ -359,4 +388,10 @@ form.addEventListener("submit", (event) => {
 form.addEventListener("reset", (event) => {
     event.preventDefault();
     values.resetValues();
+},);
+
+// Ивент на сброс таблицы
+button.addEventListener("click", (event) => {
+    event.preventDefault();
+    storage.clearStorage();
 },);
