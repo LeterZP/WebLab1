@@ -177,8 +177,8 @@ const draw = {
 // Объект values для взаимодействия со значениями формы
 const values = {
     X: document.getElementsByName("X"),
-    Y: document.getElementsByClassName("Y"),
-    R: document.getElementsByClassName("R"),
+    Y: document.getElementsByName("Y"),
+    R: document.getElementsByName("R"),
 
     // Функция для выключения одной кнопки и включения остальных
     disableButton: (i) => {
@@ -207,8 +207,8 @@ const values = {
     },
 
     // Функция для получения Y из формы
-    getY: () => {;
-        return Number(values.Y[0].value);
+    getY: () => {
+        return Number(values.Y[0].value.split(',').join('.'));
     },
 
     // Функция для получения R из формы
@@ -373,15 +373,18 @@ for (let i = 0; i < values.R.length; i++) {
 form.addEventListener("submit", (event) => {
     event.preventDefault();
     const [x, y, r] = values.getValues();
+    const msg = document.getElementById("message");
     if (x != undefined && y != undefined && r != undefined) {
         draw.form(r);
         draw.point(x, y);
         storage.addItem(x, y, r);
-        values.resetValues();
+        msg.className = "success";
+        msg.textContent = "Данные успешно добавлены.";
     } else {
-        const msg = document.getElementById("message");
-        msg.textContent = "Введеные значения неверны. Попробуйте снова.";
+        msg.className = "failure"
+        msg.textContent = "Введенные значения неверны. Попробуйте снова.";
     };
+    values.resetValues();
 },);
 
 // Ивент на сброс формы

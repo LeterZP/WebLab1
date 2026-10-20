@@ -2,6 +2,11 @@ body {
     margin: 0;
 }
 
+p {
+    margin: 0;
+    text-align: center;
+}
+
 table {
     border-spacing: 0;
     width: 100%;
@@ -11,11 +16,10 @@ thead {
     font-family: serif;
     font-size: 18pt;
     color: rgb(58, 58, 58);
-    background-color: rgb(202, 243, 255);
-    text-align: left;
 }
 
 th {
+    background-color: rgb(202, 243, 255);
     padding: 18px;
     border-bottom: 2px solid black;
     border-left: 1px solid black;
@@ -26,19 +30,51 @@ td {
     border: 1px solid black;
 }
 
+[name="R"]:enabled, .button {
+    background-color:lightskyblue;
+    border: 2px solid black;
+}
+
+[name="R"]:disabled {
+    background-color: rgb(0, 10, 143);
+    color: white;
+    border: 2px solid white;
+}
+
 .canvas {
     text-align: center;
 }
 
-.success, .failure {
-    text-align: center;
-    padding: 12px;
-}
-
 .success {
     background-color: greenyellow;
+    text-align: center;
 }
 
 .failure {
     background-color: rgb(255, 95, 67);
+    text-align: center;
+}
+
+form #message {
+    text-align: right;
+}
+
+input:checked + label {
+    color: blue;
+}
+
+input[type="radio"][value] {
+    accent-color: blue;
+}
+
+input::placeholder {
+    color: lightskyblue;
+}
+
+input:focus-visible {
+    outline: 2px solid blue;
+}
+
+fieldset legend {
+    color: blue;
 }
