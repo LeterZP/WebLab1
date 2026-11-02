@@ -85,8 +85,8 @@ const draw = {
             context.lineTo(center.x + 0.02*size, center.y - 0.75*size);
             context.closePath();
             context.stroke();
-            context.fillText("R", center.x + 0.22*size, center.y - 0.05*size);
-            context.fillText("R", center.x + 0.05*size, center.y - 0.22*size);
+            context.fillText("1", center.x + 0.22*size, center.y - 0.05*size);
+            context.fillText("1", center.x + 0.05*size, center.y - 0.22*size);
         };
 
         lines();
@@ -205,6 +205,10 @@ const values = {
     Y: document.getElementsByName("Y"),
     R: document.getElementsByName("R"),
 
+    Xvalids: [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2],
+    Yvalids: [-5, 3],
+    Rvalids: [1, 1.5, 2, 2.5, 3],
+
     // Функция для выключения одной кнопки и включения остальных
     disableButton: (i) => {
         for (let j = 0; j < values.R.length; j++) {
@@ -222,56 +226,82 @@ const values = {
         values.disableButton(0);
     },
 
-    // Функция для получения X из формы
+    // Функция для получения всех X из формы
     getX: () => {
-        let radio;
+        let result = [];
         for (let i = 0; i < values.X.length; i++) {
-            if (values.X[i].checked === true) radio = values.X[i];
+            if (values.X[i].checked === true) result[result.length] = values.X[i].value;
         };
-        return Number(radio.value);
+        return result;
     },
 
-    // Функция для получения Y из формы
+    // Функция для получения всех Y из формы
     getY: () => {
-        return Number(values.Y[0].value.split(',').join('.'));
+        let result = [];
+        for (let i = 0; i < values.Y.length; i++) {
+            result[result.length] = values.Y[i].value.split(',').join('.');
+        };
+        return result;
     },
 
-    // Функция для получения R из формы
+    // Функция для получения всех R из формы
     getR: () => {
-        let button;
+        let result = [];
         for (let i = 0; i < values.R.length; i++) {
             if (values.R[i].disabled === true) {
-                button = values.R[i];
-                break;
+                result[result.length] = values.R[i].value;
             };
         };
-        return Number(button.value);
+        return result;
     },
 
-    // Функция для валидации полученных значений X, Y и R
-    validValues: () => {
-        let radio = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2];
-        let min = -5; let max = 3;
-        let button = [1, 1.5, 2, 2.5, 3];
-        let x = values.getX();
-        let y = values.getY();
-        let r = values.getR();
-        for (let i = 0; i < radio.length; i++) {
-            if (x === radio[i]) break;
-            if (i + 1 === radio.length) return false;
+    // Функция для проверки X на попадание в область валидных значений
+    checkX: (x) => {
+        for (let i = 0; i < values.Xvalids.length; i++) {
+            if (x === values.Xvalids[i]) return true;
         };
-        if (y.toString() == NaN.toString() || y > max || y < min) return false;
-        for (let i = 0; i < button.length; i++) {
-            if (r === button[i]) break;
-            if (i + 1 === button.length) return false;
-        };
-        return true;
+        return false;
     },
 
-    // Функция для получения валидных значений X, Y и R
-    getValues: () => {
-        if (values.validValues()) return [values.getX(), values.getY(), values.getR()];
-        return [undefined, undefined, undefined];
+    // Функция для проверки Y на попадание в область валидных значений
+    checkY: (y) => {
+        if (y >= values.Yvalids[0] && y <= values.Yvalids[1]) return true;
+        return false;
+    },
+
+    // Функция для проверки R на попадание в область валидных значений
+    checkR: (r) => {
+        for (let i = 0; i < values.Rvalids.length; i++) {
+            if (r === values.Rvalids[i]) return true;
+        };
+        return false;
+    },
+
+    // Функция для валидации значений и отправки сообщения в случае ошибки
+    validateValues: (msg, value) => {
+        let x = value[0];
+        let y = value[1];
+        let r = value[2];
+        if (x.length != 1) msg.textContent = `Получено ${x.length} аргументов X, ожидалось 1`;
+        else if (y.length != 1) msg.textContent = `Получено ${y.length} аргументов Y, ожидалось 1`;
+        else if (r.length != 1) msg.textContent = `Получено ${r.length} аргументов R, ожидалось 1`;
+        else {
+            x = x[0]; y = y[0]; r = r[0];
+            if (isNaN(x)) msg.textContent = `Полученное значение X = ${x} не является числом`;
+            else if (isNaN(y)) msg.textContent = `Полученное значение Y = ${y} не является числом`;
+            else if (isNaN(r)) msg.textContent = `Полученное значение R = ${r} не является числом`;
+            else {
+                x = Number(x); y = Number(y); r = Number(r);
+                if (!values.checkX(x)) msg.textContent = `Значение X = ${x} не попадает в область допустимых значений`;
+                else if (!values.checkY(y)) msg.textContent = `Значение Y = ${y} не попадает в область допустимых значений`;
+                else if (!values.checkR(r)) msg.textContent = `Значение R = ${r} не попадает в область допустимых значений`;
+                else {
+                    return true;
+                };
+            };
+        };
+        msg.className = "failure";
+        return false;
     },
 };
 
@@ -371,17 +401,16 @@ for (let i = 0; i < values.R.length; i++) {
 // Ивент на отправку формы
 form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const [x, y, r] = values.getValues();
     const msg = document.getElementById("message");
-    if (x != undefined && y != undefined && r != undefined) {
+    let value = [values.getX(), values.getY(), values.getR()];
+    if (values.validateValues(msg, value)) {
+        let [x, y, r] = [...value[0], ...value[1], ...value[2]];
+        x = Number(x); y = Number(y); r = Number(r);
         draw.form(r);
         draw.point(x, y);
         storage.addItem(x, y, r);
         msg.className = "success";
-        msg.textContent = "Данные успешно добавлены.";
-    } else {
-        msg.className = "failure"
-        msg.textContent = "Введенные значения неверны. Попробуйте снова.";
+        msg.textContent = `Данные X = ${x}, Y = ${y}, R = ${r} успешно добавлены`;
     };
 },);
 
