@@ -174,6 +174,31 @@ const draw = {
 
 
 
+// Объект для функций различного назначения
+const side = {
+    // Функция для вычисления попадания точки
+    isHitted: (x, y, r) => {
+        if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return true;
+        if (x <= 0 && y >= 0 && y <= x + r) return true;
+        if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return true;
+        return false;
+    },
+
+    // Функция для нахождения текущего времени UTC в виде строки
+    getTime: () => {
+        const date = new Date();
+        return date.toUTCString().split(",")[1];
+    },
+
+    // Функция для превращения строки UTC в местное время
+    parseTime: (time) => {
+        const date = new Date(time);
+        return date.toLocaleString("ru-RU").split(",").join("");
+    },
+};
+
+
+
 // Объект values для взаимодействия со значениями формы
 const values = {
     X: document.getElementsByName("X"),
@@ -276,7 +301,7 @@ const storage = {
 
     // Функция для добавления значения в хранилище
     addItem: (x, y, r) => {
-        let item = [x, y, r, isHitted(x, y, r), getTime()];
+        let item = [x, y, r, side.isHitted(x, y, r), side.getTime()];
         let key = storage.data.length;
         storage.storage.setItem(key, item);
         storage.data[key] = item;
@@ -308,7 +333,7 @@ const storage = {
         const tr = document.createElement("tr");
         tr.id = "item " + i;
         if (item[3]) tr.className = "success"; else tr.className = "failure";
-        item[4] = parseTime(item[4]);
+        item[4] = side.parseTime(item[4]);
         const arr = [i, ...item];
         for (let j in arr) {
             const J = document.createElement("td");
@@ -320,32 +345,6 @@ const storage = {
             table.insertBefore(tr, previousTr);
         } else table.appendChild(tr);
     },
-};
-
-
-
-// Функция для вычисления попадания точки
-function isHitted(x, y, r) {
-    if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return true;
-    if (x <= 0 && y >= 0 && y <= x + r) return true;
-    if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return true;
-    return false;
-};
-
-
-
-// Функция для нахождения текущего времени UTC в виде строки
-function getTime() {
-    const date = new Date();
-    return date.toUTCString().split(",")[1];
-};
-
-
-
-// Функция для превращения строки UTC в местное время
-function parseTime(time) {
-    const date = new Date(time);
-    return date.toLocaleString("ru-RU").split(",").join("");
 };
 
 
@@ -384,7 +383,6 @@ form.addEventListener("submit", (event) => {
         msg.className = "failure"
         msg.textContent = "Введенные значения неверны. Попробуйте снова.";
     };
-    values.resetValues();
 },);
 
 // Ивент на сброс формы
