@@ -8,6 +8,7 @@ const draw = {
         x: canvas.height / 2,
         y: canvas.width / 2, 
     },
+    accuracy: 0.00000001,
 
     // Функция для отрисовки координатной плоскости
     coordinates: () => {
@@ -178,6 +179,7 @@ const draw = {
 const side = {
     // Функция для вычисления попадания точки
     isHitted: (x, y, r) => {
+        x = values.toNum(x)[1]; y = values.toNum(y)[1]; r = values.toNum(r)[1];
         if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return "да";
         if (x <= 0 && y >= 0 && y <= x + r) return "да";
         if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return "да";
@@ -277,6 +279,21 @@ const values = {
         return false;
     },
 
+    toNum: (num) => {
+        let val = Number(num);
+        let str = val.toFixed();
+        if (str === num) return [num, val];
+        for (let i = 0; i < num.length; i++) {
+            if (i >= str.length || Number(num[i]) > Number(str[i])) {
+                if (val >= 0) return [num, val + draw.accuracy];
+                else return [num, val - draw.accuracy];
+            } else if (Number(num[i]) < Number(str[i])) {
+                if (val >= 0) return [num, val - draw.accuracy];
+                else return [num, val + draw.accuracy];
+            };
+        };
+    },
+
     // Функция для валидации значений и отправки сообщения в случае ошибки
     validateValues: (msg, value) => {
         let x = value[0];
@@ -291,10 +308,10 @@ const values = {
             else if (isNaN(y)) msg.textContent = `Полученное значение Y = ${y} не является числом`;
             else if (isNaN(r)) msg.textContent = `Полученное значение R = ${r} не является числом`;
             else {
-                x = Number(x); y = Number(y); r = Number(r);
-                if (!values.checkX(x)) msg.textContent = `Значение X = ${x} не попадает в область допустимых значений`;
-                else if (!values.checkY(y)) msg.textContent = `Значение Y = ${y} не попадает в область допустимых значений`;
-                else if (!values.checkR(r)) msg.textContent = `Значение R = ${r} не попадает в область допустимых значений`;
+                x = values.toNum(x); y = values.toNum(y); r = values.toNum(r);
+                if (!values.checkX(x[1])) msg.textContent = `Значение X = ${x[0]} не попадает в область допустимых значений`;
+                else if (!values.checkY(y[1])) msg.textContent = `Значение Y = ${y[0]} не попадает в область допустимых значений`;
+                else if (!values.checkR(r[1])) msg.textContent = `Значение R = ${r[0]} не попадает в область допустимых значений`;
                 else {
                     return true;
                 };
@@ -326,7 +343,7 @@ const storage = {
     parseItem: (str) => {
         let arr = str.split(",");
         if (arr.length != 5) return undefined;
-        return [Number(arr[0]), Number(arr[1]), Number(arr[2]), arr[3], arr[4]];
+        return [arr[0], arr[1], arr[2], arr[3], arr[4]];
     },
 
     // Функция для добавления значения в хранилище
@@ -406,12 +423,12 @@ form.addEventListener("submit", (event) => {
     let value = [values.getX(), values.getY(), values.getR()];
     if (values.validateValues(msg, value)) {
         let [x, y, r] = [...value[0], ...value[1], ...value[2]];
-        x = Number(x); y = Number(y); r = Number(r);
-        draw.form(r);
-        draw.point(x, y);
-        storage.addItem(x, y, r);
+        x = values.toNum(x); y = values.toNum(y); r = values.toNum(r);
+        draw.form(r[1]);
+        draw.point(x[1], y[1]);
+        storage.addItem(x[0], y[0], r[0]);
         msg.className = "success";
-        msg.textContent = `Данные X = ${x}, Y = ${y}, R = ${r} успешно добавлены`;
+        msg.textContent = `Данные X = ${x[0]}, Y = ${y[0]}, R = ${r[0]} успешно добавлены`;
     };
 },);
 
