@@ -178,10 +178,10 @@ const draw = {
 const side = {
     // Функция для вычисления попадания точки
     isHitted: (x, y, r) => {
-        if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return true;
-        if (x <= 0 && y >= 0 && y <= x + r) return true;
-        if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return true;
-        return false;
+        if (y >= 0 && x**2 + y**2 <= ((r/2)**2)) return "да";
+        if (x <= 0 && y >= 0 && y <= x + r) return "да";
+        if (x <= 0 && y <= 0 && x >= -r/2 && y >= -r) return "да";
+        return "нет";
     },
 
     // Функция для нахождения текущего времени UTC в виде строки
@@ -326,7 +326,7 @@ const storage = {
     parseItem: (str) => {
         let arr = str.split(",");
         if (arr.length != 5) return undefined;
-        return [Number(arr[0]), Number(arr[1]), Number(arr[2]), Boolean(arr[3] === "true"), arr[4]];
+        return [Number(arr[0]), Number(arr[1]), Number(arr[2]), arr[3], arr[4]];
     },
 
     // Функция для добавления значения в хранилище
@@ -359,10 +359,11 @@ const storage = {
 
     // Функция для вывода элементов хранилища в таблицу
     showItem: (i, item) => {
+        if (item == undefined) return;
         const table = document.getElementById("storage");
         const tr = document.createElement("tr");
         tr.id = "item " + i;
-        if (item[3]) tr.className = "success"; else tr.className = "failure";
+        item[3] === "да" ? tr.className = "success" : tr.className = "failure";
         item[4] = side.parseTime(item[4]);
         const arr = [i, ...item];
         for (let j in arr) {
